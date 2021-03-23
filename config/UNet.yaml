@@ -1,0 +1,62 @@
+default: &DEFAULT
+
+  # training settings
+  weight_init: {conv_init: 'normal', conv_scale: 0.02, conv_bias: 0.}
+  lr: 1E-4
+  LRsched: None
+  batch_size: 16
+  num_epochs: 150
+  diff_precision: 1E-3
+
+  # data
+  data_path: '/global/home/users/pharrington/diffusion_unet/data/base_Dc_aggdata'
+  OODpaths: ['/global/home/users/pharrington/diffusion_unet/data/baseOOD_asymm_aggdata',
+             '/global/home/users/pharrington/diffusion_unet/data/baseOOD_Dc_aggdata']
+  OODnames: ['asymm', 'scale']
+  Ntrain: 9252
+  Nval: 2313
+  data_size: 128
+  N_channels: 1
+  time_idx: [5]
+  num_data_workers: 4
+  bias_scale: [-1., 10.] # optional re-scale parameters: add bias, then multiply by scale
+
+  # network architecture
+  N_feature_scales: 4 
+  Nf_base: 128
+  N_stride1_convs: 0
+  use_periodic_padding: True  
+  LeakyReLU_alpha: 0.1
+  kernel_size: 4
+  useBN: False
+  final_act: None
+
+
+nonperiodic:
+  <<: *DEFAULT
+  use_periodic_padding: False
+
+def_nf2:
+  <<: *DEFAULT
+  Nf_base: 256
+
+def_nf2sc5:
+  <<: *DEFAULT
+  Nf_base: 256
+  N_feature_scales: 5
+
+def_str1:
+  <<: *DEFAULT
+  N_stride1_convs: 1
+
+def_sched:
+  <<: *DEFAULT
+  LRsched: [30000, 0.5]
+  num_epochs: 200
+
+def_sched_relu:
+  <<: *DEFAULT
+  LRsched: [30000, 0.5]
+  num_epochs: 200
+  final_act: 'relu'
+
