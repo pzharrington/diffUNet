@@ -1,0 +1,36 @@
+#!/bin/bash
+#SBATCH --nodes=1
+#SBATCH --time=01:00:00
+#SBATCH --account m3363 
+#SBATCH -C haswell
+#SBATCH -q regular
+#SBATCH --array=0-0 # (indexing always start from 0) Just run once unless specified otherwise
+
+arrIdx=${SLURM_ARRAY_TASK_ID}
+
+dirName='baseOOD_asymm'
+configFile='./Exec/inputs_asymmGauss'
+codeList=' ./Exec/main2d.gnu.haswell.MPI.ex ./run_rand_asymmGauss.sh ./mergeh5.py'
+date
+
+coreN='diffUNet/'${dirName}
+srcDir=`pwd`
+wrkDir=$CSCRATCH/${coreN}-${arrIdx}
+mkdir -p ${wrkDir}
+cp -rp $codeList $configFile $wrkDir
+cd  $wrkDir
+
+
+echo start-`date`
+for i in {0..150}; do 
+  ./run_rand_asymmGauss.sh ./${configFile##*/} $i
+  echo "Finished run $i"
+done
+echo done-`date`
+
+rm ./out_* -rf
+
+# mv slurm log to final destination
+mv $srcDir/slurm-${SLURM_ARRAY_JOB_ID}_${SLURM_ARRAY_TASK_ID}.out .
+
+
